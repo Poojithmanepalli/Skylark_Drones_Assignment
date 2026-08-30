@@ -2,18 +2,20 @@
 
 A conversational business intelligence agent that connects to live Monday.com boards containing Deals and Work Orders data, cleans messy operational data, and answers founder-level business questions with actionable insights.
 
+---
+
 ## 1. Overview
 
-The application is designed around a common business intelligence workflow:
+The application is designed around a business intelligence workflow:
 
-**Founder question → Query interpretation → Monday.com data → Data cleaning → Business intelligence → Cross-board analysis → Business answer**
+**Founder Question → Query Understanding → Monday.com Data → Data Cleaning → Business Intelligence → Cross-Board Analysis → Business Answer**
 
-The agent currently works with two Monday.com boards:
+The agent works with two Monday.com boards:
 
 - **Deals** — sales pipeline and deal information
 - **Work Orders** — project execution and financial information
 
-The application reads data dynamically from Monday.com rather than hardcoding the provided CSV data.
+The application reads data dynamically from Monday.com rather than relying on hardcoded CSV data.
 
 ---
 
@@ -39,7 +41,7 @@ The agent can answer questions about:
 - Ongoing work
 - Not-started work
 - Work orders by sector
-- Execution/completion performance
+- Execution and completion performance
 
 ### Financial Intelligence
 
@@ -66,11 +68,25 @@ can combine:
 - Work-order volume
 - Completed work orders
 - Completion rate
-- A leadership-oriented takeaway
+- Leadership-oriented observations
 
 The agent can also identify sectors where meaningful pipeline exists alongside relatively weak execution.
 
-### Data Quality
+### Conversational Query Understanding
+
+The application supports natural-language variations of business questions.
+
+For example, users do not need to use the exact wording of predefined questions. Questions such as:
+
+- "How is Mining doing?"
+- "Give me an overview of Mining."
+- "Which sector executes best?"
+- "Where are we strongest operationally?"
+- "Which part of the business needs attention?"
+
+can be interpreted and mapped to the relevant business intelligence analysis.
+
+### Data Quality Handling
 
 The application explicitly surfaces data-quality limitations rather than silently treating missing values as valid business information.
 
@@ -85,6 +101,8 @@ Examples include:
 
 ## 3. Architecture
 
+The application follows a modular architecture:
+
 ```text
                          ┌─────────────────────┐
                          │    User Question    │
@@ -92,17 +110,17 @@ Examples include:
                                     │
                                     ▼
                          ┌─────────────────────┐
-                         │   Conversational    │
-                         │    Agent Layer      │
+                         │ Query Understanding │
+                         │  & Agent Layer      │
                          └──────────┬──────────┘
                                     │
                                     ▼
                     ┌──────────────────────────────┐
-                    │      Monday.com API          │
+                    │       Monday.com API         │
                     │                              │
                     │   ┌────────┐   ┌──────────┐ │
-                    │   │ Deals  │   │Work      │ │
-                    │   │ Board  │   │Orders    │ │
+                    │   │ Deals  │   │   Work   │ │
+                    │   │ Board  │   │  Orders  │ │
                     │   └────────┘   └──────────┘ │
                     └──────────────┬───────────────┘
                                    │
@@ -124,6 +142,7 @@ Examples include:
              Pipeline Analysis              Work Order Analysis
                     │                               │
                     └───────────────┬───────────────┘
+                                    │
                                     ▼
                          ┌─────────────────────┐
                          │   Cross-Board      │
@@ -135,219 +154,426 @@ Examples include:
                          │ Founder-Level       │
                          │ Business Response   │
                          └─────────────────────┘
+```
 
+### Main Components
+
+| Component | Responsibility |
+|---|---|
+| `app.py` | Streamlit user interface and conversation history |
+| `agent.py` | Query understanding, routing, and response generation |
+| `monday_client.py` | Monday.com GraphQL API communication |
+| `data_cleaner.py` | Cleaning and normalization of board data |
+| `business_intelligence.py` | Core business intelligence calculations |
+| `check_financials.py` | Financial and receivables analysis |
+| `inspect_data.py` | Data inspection and debugging utilities |
+| `test_agent.py` | Agent-level tests |
+| `test_bi.py` | Business intelligence tests |
+
+---
 
 ## 4. Technology Stack
+
 - **Python** — core application and business logic
-- **Pandas** — data processing and analysis
+- **Pandas** — data processing, cleaning, and analysis
 - **Requests** — Monday.com GraphQL API communication
 - **Streamlit** — conversational web interface
 - **python-dotenv** — local environment configuration
 - **Monday.com GraphQL API** — live business data source
+- **OpenAI API** — semantic understanding of natural-language business questions
 
-##5. Project Structure
+The implementation intentionally uses a lightweight Python-based stack so that the application remains easy to understand, deploy, and maintain.
+
+---
+
+## 5. Monday.com Integration
+
+The application retrieves live data from Monday.com using its GraphQL API.
+
+Two boards are used:
+
+### Deals Board
+
+Contains sales pipeline information such as:
+
+- Deal name
+- Sector
+- Deal value
+- Deal status
+- Closure probability
+- Other relevant deal attributes
+
+### Work Orders Board
+
+Contains execution and financial information such as:
+
+- Work order
+- Sector
+- Status
+- Work order value
+- Billing information
+- Collection information
+- Receivables
+
+The application dynamically retrieves board data at runtime.
+
+No business results are hardcoded into the application.
+
+---
+
+## 6. Data Cleaning & Normalization
+
+Real-world operational data may contain missing, inconsistent, or differently formatted values.
+
+The application therefore performs data cleaning before business analysis.
+
+Typical transformations include:
+
+- Normalizing column names
+- Handling missing values
+- Converting numeric fields safely
+- Normalizing categorical values
+- Handling blank sectors
+- Converting financial fields into usable numeric values
+- Preventing malformed records from breaking the analysis
+
+This allows the business intelligence layer to operate on a consistent representation of the underlying Monday.com data.
+
+---
+
+## 7. Business Intelligence Layer
+
+The business intelligence layer contains reusable functions for answering common business questions.
+
+### Pipeline Analysis
+
+Examples:
+
+- Total pipeline
+- Open pipeline
+- Won pipeline
+- Dead/lost deals
+- Largest open deals
+- Pipeline by sector
+
+### Work Order Analysis
+
+Examples:
+
+- Total work orders
+- Completed work orders
+- Ongoing work
+- Not-started work
+- Work orders by sector
+- Completion rates
+
+### Financial Analysis
+
+Examples:
+
+- Total work order value
+- Billed amount
+- Collected amount
+- Receivables
+- Unbilled amount
+
+### Cross-Board Analysis
+
+The application can combine Deals and Work Orders data using common business dimensions such as sector.
+
+This enables questions such as:
+
+- Which sectors have strong pipeline but weak execution?
+- How is a particular sector performing?
+- Which sectors have significant business activity?
+- Where should leadership pay attention?
+
+---
+
+## 8. Conversational Query Handling
+
+The agent accepts natural-language questions rather than requiring users to select a predefined report.
+
+The query handling process is:
+
+```text
+User Question
+      ↓
+Understand Intent
+      ↓
+Identify Business Area
+      ↓
+Select Relevant Analysis
+      ↓
+Retrieve Live Monday.com Data
+      ↓
+Perform Calculation
+      ↓
+Generate Business-Oriented Response
+```
+
+The application also supports semantic variations of business questions.
+
+For example, questions about operational strength may be mapped to work-order execution analysis even when the user does not use the exact phrase "work-order execution."
+
+---
+
+## 9. Leadership-Oriented Insights
+
+The goal is not only to return raw numbers but also to provide information that is useful for decision-making.
+
+For example, instead of only returning:
+
+> Mining has 100 work orders.
+
+the agent can combine relevant operational and pipeline information to provide context about:
+
+- Business activity
+- Pipeline strength
+- Execution performance
+- Completion rate
+- Potential execution risks
+
+This supports a founder-level view of the business rather than simply presenting database records.
+
+---
+
+## 10. Error Handling
+
+The application includes handling for common data and API issues.
+
+### API Failures
+
+If Monday.com cannot be reached or an API request fails, the application catches the exception and returns a user-facing error rather than crashing silently.
+
+### Data Quality Issues
+
+Missing or malformed values are handled during data cleaning.
+
+The application avoids presenting unavailable information as if it were valid.
+
+### Query Handling
+
+If a question cannot be confidently mapped to the supported business analyses, the agent communicates the supported areas instead of inventing a result.
+
+---
+
+## 11. Project Structure
+
+```text
 Skylark_Drones_Assignment/
 │
 ├── agent.py
 ├── app.py
 ├── business_intelligence.py
-├── data_cleaner.py
-├── monday_client.py
-├── inspect_data.py
 ├── check_financials.py
+├── data_cleaner.py
+├── inspect_data.py
+├── monday_client.py
+│
 ├── test_agent.py
 ├── test_bi.py
+│
 ├── requirements.txt
 ├── README.md
 ├── DECISION_LOG.md
 └── .gitignore
+```
 
-Main modules
+---
 
-monday_client.py
+## 12. Local Setup
 
-Handles communication with Monday.com and retrieves board data dynamically through the GraphQL API.
+### 12.1 Clone the Repository
 
-data_cleaner.py
+```bash
+git clone https://github.com/Poojithmanepalli/Skylark_Drones_Assignment.git
+cd Skylark_Drones_Assignment
+```
 
-Cleans and normalizes retrieved business data, including dates, numeric values, missing values, and categorical fields.
+### 12.2 Create a Virtual Environment
 
-business_intelligence.py
+Windows:
 
-Contains the business analysis functions for pipeline, work orders, financials, data quality, and cross-board sector analysis.
+```powershell
+python -m venv venv
+venv\Scripts\activate
+```
 
-agent.py
+### 12.3 Install Dependencies
 
-Interprets user questions and routes them to the appropriate business intelligence functionality.
+```powershell
+pip install -r requirements.txt
+```
 
-app.py
+### 12.4 Configure Environment Variables
 
-Provides the Streamlit conversational interface.
+Create a `.env` file in the project root.
 
-##6. Monday.com Configuration
+Example:
 
-The application expects two Monday.com boards.
-
-Deals Board
-
-Contains sales pipeline information such as:
-
-Deal status
-Deal stage
-Deal value
-Sector/service
-Product
-Closure information
-Client information
-Work Orders Board
-
-Contains execution and financial information such as:
-
-Execution status
-Sector
-Type of work
-Work order value
-Billing information
-Collection information
-Receivables
-Work order status
-
-The application does not hardcode the CSV data. It retrieves the current board contents dynamically from Monday.com.
-
-The Monday.com integration is read-only.
-
-##7. Environment Variables
-
-For local development, create a .env file in the project root:
-
+```text
 MONDAY_API_TOKEN=your_monday_api_token
 DEALS_BOARD_ID=your_deals_board_id
 WORK_ORDERS_BOARD_ID=your_work_orders_board_id
+OPENAI_API_KEY=your_openai_api_key
+```
 
-Do not commit .env to GitHub.
+Do not commit `.env` to GitHub.
 
-For the hosted Streamlit application, the same values are configured through Streamlit Secrets.
+The repository's `.gitignore` excludes environment secrets.
 
-##8. Local Setup
+### 12.5 Run the Application
 
-Clone the repository and enter the project directory:
-
-git clone https://github.com/Poojithmanepalli/Skylark_Drones_Assignment.git
-cd Skylark_Drones_Assignment
-
-Create a virtual environment:
-
-python -m venv venv
-
-Activate it on Windows PowerShell:
-
-.\venv\Scripts\Activate.ps1
-
-Install dependencies:
-
-pip install -r requirements.txt
-
-Configure the .env file with the Monday.com credentials.
-
-Run the application:
-
+```powershell
 streamlit run app.py
+```
 
-The application will open in the browser.
+The application will be available locally through the Streamlit URL shown in the terminal.
 
-##9. Example Questions
+---
 
-The agent supports questions such as:
-
-What is our current pipeline?
-What are our top deals?
-How are our work orders doing?
-Which sectors have the most work orders?
-How much is receivable?
-What data quality issues do we have?
-How is Mining doing?
-How is Renewables performing?
-Give me an overview of Railways.
-Which sectors have strong pipeline but execution risk?
-
-The agent is designed to answer these questions using live Monday.com data rather than a static copy of the supplied CSV data.
-
-##10. Data Resilience
-
-Real-world business data frequently contains missing or inconsistent values.
-
-The application therefore:
-
-Handles missing values gracefully
-Converts numeric business fields into usable numeric representations
-Normalizes date fields
-Preserves missing information instead of inventing values
-Handles blank categorical fields
-Reports important data-quality limitations
-Avoids probability-weighted pipeline calculations when closure probabilities are unavailable
-
-For example, if closure probability is missing for all deals, the application explicitly reports that a probability-weighted pipeline cannot currently be calculated.
-
-The application also retains data-quality caveats alongside business results so that incomplete source data does not silently become misleading information.
-
-##11. Leadership Updates
-
-The optional leadership-update requirement is interpreted as providing concise business context in addition to raw metrics.
-
-The application follows a simple pattern:
-
-Metric → Context → Potential implication → Area requiring attention
-
-For example, sector analysis can compare sales pipeline with operational execution to highlight areas where leadership may need to investigate further.
-
-Leadership-oriented analysis is intended to help quickly understand:
-
-Where pipeline is concentrated
-Where operational workload is concentrated
-Which sectors are executing well
-Where potential execution risks exist
-What data-quality limitations may affect decisions
-
-##12. Hosted Prototype
+## 13. Streamlit Deployment
 
 The application is deployed using Streamlit Community Cloud.
 
-Live Application
+Deployment steps:
+
+1. Push the project to a public GitHub repository.
+2. Connect the GitHub repository to Streamlit.
+3. Select the `main` branch.
+4. Select `app.py` as the main file.
+5. Select a compatible Python version.
+6. Add required secrets through Streamlit's Secrets configuration.
+7. Deploy the application.
+
+The deployed application reads credentials from Streamlit Secrets rather than storing them in the repository.
+
+### Required Streamlit Secrets
+
+```toml
+MONDAY_API_TOKEN = "your_monday_api_token"
+DEALS_BOARD_ID = "your_deals_board_id"
+WORK_ORDERS_BOARD_ID = "your_work_orders_board_id"
+OPENAI_API_KEY = "your_openai_api_key"
+```
+
+---
+
+## 14. Testing
+
+The project includes tests for the agent and business intelligence components.
+
+Run:
+
+```powershell
+python test_agent.py
+```
+
+and:
+
+```powershell
+python test_bi.py
+```
+
+The application was also manually tested using both predefined example questions and natural-language variations.
+
+Examples include:
+
+```text
+What is our current pipeline?
+```
+
+```text
+What are our top deals?
+```
+
+```text
+How are our work orders doing?
+```
+
+```text
+How is Mining doing?
+```
+
+```text
+Where are we strongest operationally?
+```
+
+```text
+Which sector has the highest revenue?
+```
+
+---
+
+## Hosted Application
+
+The working hosted prototype is available at:
 
 https://skylarkdronesassignment-c8jvekwjyflpffslmeanqj.streamlit.app/
 
-The hosted application can be tested without local setup and connects to the configured Monday.com boards dynamically.
+## Source Repository
 
-##13. Security
+The complete source code and documentation are available at:
 
-Credentials are not stored in the source code.
+https://github.com/Poojithmanepalli/Skylark_Drones_Assignment
 
-Local credentials are provided through .env, while the hosted application uses Streamlit Secrets.
+---
 
-The following files and directories are excluded from version control:
+## Documentation
 
+Additional design decisions and implementation trade-offs are documented in:
+
+**`DECISION_LOG.md`**
+
+The Decision Log covers:
+
+- Key assumptions
+- Technical trade-offs
+- Technology choices
+- Interpretation of leadership updates
+- What could be improved with additional development time
+
+---
+
+## Security
+
+Sensitive credentials are intentionally excluded from the repository.
+
+The following are not committed:
+
+```text
 .env
 venv/
 __pycache__/
-*.pyc
 .streamlit/secrets.toml
+```
 
-The Monday.com integration is read-only.
+API credentials should be supplied through local environment variables or Streamlit Secrets.
 
-API credentials should never be committed to the repository or included in the source-code ZIP.
+---
 
-##14. Future Improvements
+## Future Improvements
 
-With additional development time, the agent could be extended with:
+With additional development time, the application could be extended with:
 
-More flexible natural-language intent recognition
-LLM-assisted query interpretation
-More advanced relational queries across boards
-Time-period analysis such as monthly and quarterly trends
-Additional leadership dashboards
-Automated leadership-report generation
-More sophisticated anomaly and risk detection
-Expanded automated test coverage
+- More advanced natural-language query planning
+- Additional cross-board metrics
+- More granular financial analysis
+- Interactive visual dashboards
+- More comprehensive automated testing
+- Additional business KPIs
+- Improved conversational context across multiple follow-up questions
+- More advanced anomaly and risk detection
 
-The current implementation prioritizes reliable access to live Monday.com data, transparent business calculations, cross-board analysis, data resilience, and explainable results.
+---
 
+## Conclusion
+
+The Skylark Drones Business Intelligence Agent provides a lightweight conversational interface over live Monday.com business data.
+
+It combines:
+
+**Live Data + Data Cleaning + Business Intelligence + Cross-Board Analysis + Natural-Language Query Understanding**
+
+to turn operational data into founder-level business insights.
