@@ -137,16 +137,15 @@ Examples include:
                          └─────────────────────┘
 
 
----
 ## 4. Technology Stack
--Python
--Pandas — data processing and analysis
--Requests — Monday.com GraphQL API communication
--Streamlit — conversational web interface
--python-dotenv — local environment configuration
--Monday.com GraphQL API — live business data source
+- **Python** — core application and business logic
+- **Pandas** — data processing and analysis
+- **Requests** — Monday.com GraphQL API communication
+- **Streamlit** — conversational web interface
+- **python-dotenv** — local environment configuration
+- **Monday.com GraphQL API** — live business data source
 
-5. Project Structure
+##5. Project Structure
 Skylark_Drones_Assignment/
 │
 ├── agent.py
@@ -185,7 +184,7 @@ app.py
 
 Provides the Streamlit conversational interface.
 
-6. Monday.com Configuration
+##6. Monday.com Configuration
 
 The application expects two Monday.com boards.
 
@@ -217,7 +216,7 @@ The application does not hardcode the CSV data. It retrieves the current board c
 
 The Monday.com integration is read-only.
 
-7. Environment Variables
+##7. Environment Variables
 
 For local development, create a .env file in the project root:
 
@@ -229,7 +228,7 @@ Do not commit .env to GitHub.
 
 For the hosted Streamlit application, the same values are configured through Streamlit Secrets.
 
-8. Local Setup
+##8. Local Setup
 
 Clone the repository and enter the project directory:
 
@@ -256,7 +255,7 @@ streamlit run app.py
 
 The application will open in the browser.
 
-9. Example Questions
+##9. Example Questions
 
 The agent supports questions such as:
 
@@ -273,7 +272,7 @@ Which sectors have strong pipeline but execution risk?
 
 The agent is designed to answer these questions using live Monday.com data rather than a static copy of the supplied CSV data.
 
-10. Data Resilience
+##10. Data Resilience
 
 Real-world business data frequently contains missing or inconsistent values.
 
@@ -291,7 +290,7 @@ For example, if closure probability is missing for all deals, the application ex
 
 The application also retains data-quality caveats alongside business results so that incomplete source data does not silently become misleading information.
 
-11. Leadership Updates
+##11. Leadership Updates
 
 The optional leadership-update requirement is interpreted as providing concise business context in addition to raw metrics.
 
@@ -309,7 +308,7 @@ Which sectors are executing well
 Where potential execution risks exist
 What data-quality limitations may affect decisions
 
-12. Hosted Prototype
+##12. Hosted Prototype
 
 The application is deployed using Streamlit Community Cloud.
 
@@ -319,7 +318,7 @@ https://skylarkdronesassignment-c8jvekwjyflpffslmeanqj.streamlit.app/
 
 The hosted application can be tested without local setup and connects to the configured Monday.com boards dynamically.
 
-13. Security
+##13. Security
 
 Credentials are not stored in the source code.
 
@@ -337,7 +336,7 @@ The Monday.com integration is read-only.
 
 API credentials should never be committed to the repository or included in the source-code ZIP.
 
-14. Future Improvements
+##14. Future Improvements
 
 With additional development time, the agent could be extended with:
 
