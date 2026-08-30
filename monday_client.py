@@ -1,6 +1,7 @@
 import os
 import requests
 import pandas as pd
+import streamlit as st
 from dotenv import load_dotenv
 
 from data_cleaner import (
@@ -11,9 +12,24 @@ from data_cleaner import (
 
 load_dotenv()
 
-MONDAY_API_TOKEN = os.getenv("MONDAY_API_TOKEN")
-DEALS_BOARD_ID = os.getenv("DEALS_BOARD_ID")
-WORK_ORDERS_BOARD_ID = os.getenv("WORK_ORDERS_BOARD_ID")
+def get_config(key):
+    """
+    Read configuration from Streamlit Secrets when deployed,
+    otherwise fall back to environment variables for local development.
+    """
+    try:
+        value = st.secrets.get(key)
+        if value:
+            return value
+    except Exception:
+        pass
+
+    return os.getenv(key)
+
+
+MONDAY_API_TOKEN = get_config("MONDAY_API_TOKEN")
+DEALS_BOARD_ID = get_config("DEALS_BOARD_ID")
+WORK_ORDERS_BOARD_ID = get_config("WORK_ORDERS_BOARD_ID")
 
 API_URL = "https://api.monday.com/v2"
 
